@@ -29,7 +29,7 @@ CATEGORIES = {
 
 URL = "https://shop.westernmustangs.ca/"
 USERNAME = "jwan659"
-PASSWORD = ""
+PASSWORD = "ENTER PASSWORD HERE"
 
 def get_date_from_slot_div(div):
     return div.find_elements_by_class_name("pull-left")[0].get_attribute('innerHTML').strip()
@@ -39,7 +39,6 @@ def get_time_from_slot_div(div):
     only_time = full_str[:full_str.index("<")].strip()
 
     return only_time
-
 
 def get_filtered_time_slots(driver, user_dates, user_time_slots):
     # users selected time slots
@@ -79,7 +78,7 @@ def register_time_slot_before_log_in(driver, div, logged_in=False):
     if register_button is not None: 
         register_button.click()
         print("Clicked on register button before logging in!")
-        time.sleep(5)
+        time.sleep(2)
 
     return driver
 
@@ -144,7 +143,8 @@ def checkout(driver):
     time.sleep(1)
     confirm_button = all_buttons[4]
     confirm_button.click()
-    time.sleep(10)
+    time.sleep(2)
+
     return driver
 
 def login(driver): 
@@ -154,13 +154,13 @@ def login(driver):
 
     #Enter Username and Password
     user_id_field = driver.find_elements_by_id("userId")
-    user_id_field[0].send_keys("JWAN659")
+    user_id_field[0].send_keys(USERNAME)
     
     password_field = driver.find_elements_by_id("password")
-    password_field[0].send_keys("Manhunt99!")
+    password_field[0].send_keys(PASSWORD)
 
     login_form_button = driver.find_elements_by_class_name("adt-primaryAction")
-    time.sleep(5)
+    time.sleep(2)
     login_form_button[0].click()
 
     time.sleep(2)
@@ -173,41 +173,33 @@ def acknowledge_cookies(driver):
     return driver
 
 def main():
-    #driver = webdriver.Chrome(ChromeDriverManager().install())
     driver = webdriver.Chrome('/Users/jefferywang/opt/anaconda3/envs/gym-bot/bin/chromedriver', options=chrome_options)
 
     driver.get(URL)
 
     driver = acknowledge_cookies(driver)
-    login_button = None
-    western_student_login_button = None
 
     reservation_link = driver.find_elements_by_class_name('Menu-Item')[0].get_attribute('href')
     driver.get(reservation_link)
-    # swimming link
-    weight_room_link = driver.find_elements_by_class_name('list-group-item')[0].click()
-
+    # TODO change link
+    driver.find_elements_by_class_name('list-group-item')[0].click()
     time_slots = get_filtered_time_slots(driver, None, None) 
-
+    
     #Select the div according to some algorithm
     selected_div = time_slots[0]
-    # print(get_date_from_slot_div(selected_div), get_time_from_slot_div(selected_div))
     
     slot_data_id = selected_div.get_attribute("data-instance-id")
-    print("Data Instance ID: ", slot_data_id)
 
     driver = register_time_slot_before_log_in(driver, selected_div, logged_in = False)
     logged_in_driver = login(driver)
 
     selected_div_refreshed = logged_in_driver.find_elements_by_xpath(f"//div[@data-instance-id='{slot_data_id}']")[0]
     
-    # print(get_date_from_slot_div(selected_div_refreshed[0]), get_time_from_slot_div(selected_div_refreshed[0]))
-    
     registration_check_driver = register_time_slot_after_log_in(logged_in_driver, selected_div_refreshed, logged_in = True)
-    time.sleep(5)
+    time.sleep(1)
     
     shopping_cart_driver = check_all_boxes(registration_check_driver)
-    finished_driver = checkout(shopping_cart_driver)
+    checkout(shopping_cart_driver)
 
 if __name__ == "__main__":
     main()
